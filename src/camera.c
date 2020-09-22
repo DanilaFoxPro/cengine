@@ -13,6 +13,7 @@
 
 struct camera_t camera;
 
+/** Set default camera position, rotation, and view. */
 void camera_init(){
   
   const mat4 view = GLMS_MAT4_IDENTITY_INIT;
