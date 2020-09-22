@@ -25,7 +25,7 @@ set "CC=gcc"
 set "Action[0].CMD=premake5 gmake2"
 set "Action[0].OK=1"
 set "Action[1].CMD=mingw32-make config=%config%"
-set "Action[1].OK=0"
+set "Action[1].OK=1"
 
 call :struct_array_last_element Action CMD
 set "ActionLast=%ERRORLEVEL%"
