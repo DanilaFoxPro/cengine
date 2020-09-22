@@ -171,8 +171,8 @@ void game_state_draw(){
   glm_perspective(glm_rad(65.0f), (float)cengine.width/(float)cengine.height, 0.1f, 100.0f, projection);
   shader_uniform_matrix4fv_at(projection_location, projection[0]);
 
-  glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view[0]);
-  glUniform3fv(cameraPosition_location, 1, camera_position);
+  glUniformMatrix4fv(viewLoc, 1, GL_FALSE, camera.view[0]);
+  glUniform3fv(cameraPosition_location, 1, camera.position );
 
   mat4 model = GLMS_MAT4_IDENTITY_INIT;
   shader_uniform_matrix4fv(shader, "model", model[0]);

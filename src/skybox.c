@@ -102,7 +102,7 @@ void skybox_delete(Skybox *skybox){
 
 void skybox_draw(Skybox *skybox, float time){
   shader_bind(skybox_shader);
-  shader_uniform_matrix4fv_at(skybox_view_location, view[0]);
+  shader_uniform_matrix4fv_at(skybox_view_location, camera.view[0]);
 
   vec3 color = GLMS_VEC3_ZERO_INIT;
   glm_vec3_lerp(NIGHT_COLOR, DAY_COLOR, time, color);

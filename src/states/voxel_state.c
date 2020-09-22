@@ -481,7 +481,7 @@ void voxel_state_update(float deltaTime){
     reloadPress = 1;
   }else if(reloadPress == 1 && glfwGetKey(cengine.window, GLFW_KEY_F11) == GLFW_RELEASE){
     reloadPress = 0;
-    printf("%.6f %.6f\n", camera_position[0], camera_position[2]);
+    printf("%.6f %.6f\n", camera.position[0], camera.position[2]);
     // printf("reloading...\n");
     // voxel_state_destroy();
     // voxel_state_init();
@@ -504,7 +504,7 @@ void voxel_state_update(float deltaTime){
   
   if(left_mouse || right_mouse){
     int hx, hy, hz, cx, cy, cz;
-    if(verc_ray_march(camera_position[0], camera_position[1], camera_position[2], camera_pitch, camera_yaw, &hx, &hy, &hz, &cx, &cy, &cz)){
+    if(verc_ray_march(camera.position[0], camera.position[1], camera.position[2], camera.pitch, camera.yaw, &hx, &hy, &hz, &cx, &cy, &cz)){
       // int cx = hx / CHUNK_SIZE;
       // int cz = hz / CHUNK_SIZE;
 
@@ -531,12 +531,12 @@ void voxel_state_draw(){
   glm_perspective(glm_rad(65.0f), (float)cengine.width/(float)cengine.height, 0.1f, SKYBOX_SIZE * 2.0f, projection);
   shader_uniform_matrix4fv_at(projection_location, projection[0]);
 
-  glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-  glUniform3fv(camera_position_location, 1, camera_position);
+  glUniformMatrix4fv(view_location, 1, GL_FALSE, camera.view[0]);
+  glUniform3fv(camera_position_location, 1, camera.position );
 
-  int x = floorf(camera_position[0] / CHUNK_SIZE);
-  int y = floorf(camera_position[1] / CHUNK_SIZE);
-  int z = floorf(camera_position[2] / CHUNK_SIZE);
+  int x = floorf(camera.position[0] / CHUNK_SIZE);
+  int y = floorf(camera.position[1] / CHUNK_SIZE);
+  int z = floorf(camera.position[2] / CHUNK_SIZE);
   ensure_chunks(x, y, z);
 
   unsigned short rendered_chunks = 0;

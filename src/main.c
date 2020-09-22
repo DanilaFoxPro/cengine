@@ -8,6 +8,7 @@
 
 #include "cengine.h"
 #include "camera.h"
+#include "utility.h"
 #include "states/menu_state.h"
 #include "states/voxel_state.h"
 
@@ -84,14 +85,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
   xoffset *= sensitivity;
   yoffset *= sensitivity;
 
-  camera_yaw += xoffset;
-  camera_pitch += yoffset;
-
-  if(camera_pitch > 89.0f){
-    camera_pitch = 89.0f;
-  }else if(camera_pitch < -89.0f){
-    camera_pitch = -89.0f;
-  }
+  camera.yaw += xoffset;
+  camera.pitch += yoffset;
+  
+  clampf( &camera.pitch, -89.0f, 89.0f );
 
   // camera_update_rotation();
 }
