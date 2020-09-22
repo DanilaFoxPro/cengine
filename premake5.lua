@@ -13,6 +13,8 @@ workspace "cengine"
 
   filter {}
 
+  cdialect "gnu99"
+
   include "modules"
 
   newoption {
@@ -76,7 +78,7 @@ workspace "cengine"
 project "cengine"
   targetdir "bin"
 
-  files {"src/**.h", "src/**.c"}
+  files {"src/**.c", "modules/**.c"}
 
   includedirs {"include/", "modules/*"}
   links {"pthread", "noise"}
