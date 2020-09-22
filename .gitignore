@@ -9,3 +9,7 @@ Makefile
 
 # misc
 *.obj
+
+# KDevelop IDE
+*.kdev4
+.kdev4/
