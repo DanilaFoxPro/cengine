@@ -14,6 +14,9 @@ if "%config%"=="" (
         set config=debug
 )
 
+:: C compiler (for mingw32-make)
+set "CC=gcc"
+
 ::
 
 :: Action[n].CMD -- Command to execute.
