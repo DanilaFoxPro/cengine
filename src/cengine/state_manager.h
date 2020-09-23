@@ -22,6 +22,8 @@ typedef struct{
   int top;
 } StateManager;
 
+State state_get_empty();
+
 void state_manager_init(StateManager *state_manager);
 void state_manager_free(StateManager *state_manager);
 int state_manager_push(StateManager *state_manager, State *state);

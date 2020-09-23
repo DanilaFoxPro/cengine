@@ -3,6 +3,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @brief Gets a state with all function pointers set to NULL.
+ */
+State state_get_empty()
+{
+        State state;
+        
+        state.init    = NULL;
+        state.destroy = NULL;
+        state.update  = NULL;
+        state.draw    = NULL;
+        state.on_key  = NULL;
+        
+        return state;
+}
+
 void state_manager_init(StateManager *state_manager){
   state_manager->capacity = 3;
   state_manager->stack = malloc(state_manager->capacity * sizeof(State*));
@@ -19,7 +35,16 @@ void state_manager_free(StateManager *state_manager){
 
 int state_manager_scale(StateManager *state_manager){
   state_manager->capacity *= 2;
+  
+  State** old_stack = state_manager->stack;
   state_manager->stack = realloc(state_manager->stack, state_manager->capacity * sizeof(State*));
+  
+  if( state_manager->stack == NULL ){
+    printf( "[!] Failed to re-allocate state_manager storage.\n" );
+    state_manager->stack = old_stack;
+    state_manager->capacity /= 2;
+  }
+  
   return state_manager->capacity;
 }
 

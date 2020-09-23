@@ -114,13 +114,14 @@ int main(){
 
   glfwSetCursorPosCallback(cengine.window, mouse_callback);
 
-  State menu_state;
+  State menu_state = state_get_empty();
   menu_state.init = menu_state_init;
   menu_state.destroy = menu_state_destroy;
   menu_state.update = menu_state_update;
   menu_state.draw = menu_state_draw;
   state_manager_push(&cengine.state_manager, &menu_state);
-
+  
+  voxel_state = state_get_empty();
   voxel_state.init = voxel_state_init;
   voxel_state.destroy = voxel_state_destroy;
   voxel_state.update = voxel_state_update;
