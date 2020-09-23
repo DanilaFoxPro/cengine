@@ -21,6 +21,7 @@ float half_pixel_correction(float coord){
 }
 
 void byte4_set(GLbyte x, GLbyte y, GLbyte z, GLbyte w, byte4 dest){
+  mark_important_func();
   dest[0] = x;
   dest[1] = y;
   dest[2] = z;
@@ -28,6 +29,7 @@ void byte4_set(GLbyte x, GLbyte y, GLbyte z, GLbyte w, byte4 dest){
 }
 
 void byte3_set(GLbyte x, GLbyte y, GLbyte z, byte3 dest){
+  mark_important_func();
   dest[0] = x;
   dest[1] = y;
   dest[2] = z;
@@ -86,6 +88,7 @@ BlockIndex block_index(uint8_t x, uint8_t y, uint8_t z){
 
 // initialize a new chunk
 chunk_t chunk_init(int x, int y, int z){
+  mark_important_func();
 #if defined DEBUG && defined PRINT_TIMING
     double start = glfwGetTime();
 #endif
@@ -156,6 +159,7 @@ chunk_t chunk_init(int x, int y, int z){
 
 // delete the chunk
 void chunk_free(chunk_t *chunk){
+  mark_important_func();
   // don't delete a null chunk
   if(chunk == NULL){
     printf("NOOOO!\n");
@@ -475,6 +479,7 @@ void chunk_buffer_mesh(chunk_t *chunk){
 }
 
 void chunk_draw(chunk_t *chunk){
+  mark_important_func();
   // don't draw if chunk has no mesh
   if(!chunk->elements){
     return;

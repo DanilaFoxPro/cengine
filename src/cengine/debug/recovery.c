@@ -6,13 +6,83 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <cengine/utility.h>
+
 struct FunctionEntry {
         const char* name;
         const char* file;
         uint32_t    line;
+        uint32_t    count;
 };
 
-struct FunctionEntry last_function;
+struct {
+        struct FunctionEntry* pointer;
+        unsigned int offset;
+        unsigned int length;
+} function_log;
+
+uint8_t function_entry_equal( const struct FunctionEntry A, const struct FunctionEntry B )
+{
+        if( A.name == B.name ) {
+                if( A.file != B.file ) {
+                        printf( "%s(): Function name pointers equal, but the files are different!\n", __func__ );
+                }
+                return 1;
+        } else {
+                return 0;
+        }
+}
+
+static void funclog_setup(void)
+{
+        function_log.pointer = malloc( sizeof(struct FunctionEntry)*RECOVERY_FUNCLOG_SIZE );
+        function_log.offset  = 0;
+        function_log.length  = 0;
+}
+
+static void funclog_push( const struct FunctionEntry new )
+{
+        
+        if( function_log.length != 0 ) {
+                const unsigned int last = (function_log.offset-1) % function_log.length;
+                if( function_entry_equal( function_log.pointer[last], new ) ) {
+                        function_log.pointer[last].count++;
+                        return;
+                }
+        }
+        
+        memcpy( function_log.pointer+function_log.offset, &new, sizeof(struct FunctionEntry) );
+        
+        function_log.offset++;
+        function_log.offset %= RECOVERY_FUNCLOG_SIZE;
+        
+        function_log.length++;
+        clampui( &function_log.length, 0, RECOVERY_FUNCLOG_SIZE );
+}
+
+static void funclog_print(void)
+{
+        for( unsigned int i = 0; i < function_log.length; i++ )
+        {
+                const unsigned int position = (i+function_log.offset) % function_log.length;
+                const struct FunctionEntry entry = function_log.pointer[position];
+                
+                if( entry.count == 1 ) {
+                        recovery_safeprint( "%s\n", entry.name );
+                } else {
+                        recovery_safeprint( "%s [x%i]\n", entry.name, entry.count );
+                }
+                
+                recovery_safeprint(
+                        "  ('%s', line: '%i')\n",
+                        entry.file,
+                        entry.line
+                );
+                
+                recovery_safeprint(".\n");
+                
+        }
+}
 
 void handle_signal( int signal )
 {
@@ -46,12 +116,9 @@ void handle_signal( int signal )
         }
         
         recovery_safeprint( "Recieved signal: %s\n", signal_name );
-        recovery_safeprint(
-                "Last called function: %s (file: '%s', line: %i)\n",
-                last_function.name,
-                last_function.file,
-                last_function.line
-        );
+        recovery_safeprint( "Function log:         (older calls first)\n" );
+        recovery_safeprint( ".\n" );
+        funclog_print();
         
 }
 
@@ -63,6 +130,8 @@ void recovery_setup()
         signal( SIGILL,  handle_signal );
         signal( SIGABRT, handle_signal );
         signal( SIGFPE,  handle_signal );
+        
+        funclog_setup();
 }
 
 /**
@@ -95,10 +164,13 @@ void recovery_safeprint(const char* format, ... )
 
 void recovery_funclog_push(const char* name, const char* file, uint32_t line )
 {
-        // TODO: Proper function log.
-        last_function.name = name;
-        last_function.file = file;
-        last_function.line = line;
+        struct FunctionEntry new;
+        new.name = name;
+        new.file = file;
+        new.line = line;
+        new.count = 1;
+        
+        funclog_push( new );
 }
 
 

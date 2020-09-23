@@ -1,9 +1,12 @@
 #include <cengine\blocks.h>
 
+#include <cengine/debug/recovery.h>
+
 struct BlockInfo blocks[256];
 
 uint8_t block_is_transparent( const BlockIndex block_index )
 {
+        mark_important_func();
         return blockflag_get_value( blocks[block_index].flags, blockflag_opaque );
 }
 

@@ -25,6 +25,8 @@
 #include <cengine/skybox.h>
 #include <cengine/blocks.h>
 
+#include <cengine/debug/recovery.h>
+
 #define MAX_CHUNKS_GENERATED_PER_FRAME 8
 #define REACH_DISTANCE 12.0f
 
@@ -424,6 +426,7 @@ uint8_t collide(float *x, float *y, float *z){
 #endif
 
 void voxel_state_init(){
+  mark_important_func();
   printf("voxel state init\n");
   
   blocks_fill();
@@ -480,6 +483,7 @@ void voxel_state_destroy(){
 }
 
 void voxel_state_update(float deltaTime){
+  mark_important_func();
   if(glfwGetKey(cengine.window, GLFW_KEY_F11) == GLFW_PRESS){
     reloadPress = 1;
   }else if(reloadPress == 1 && glfwGetKey(cengine.window, GLFW_KEY_F11) == GLFW_RELEASE){
@@ -523,6 +527,7 @@ void voxel_state_update(float deltaTime){
 }
 
 void voxel_state_draw(){
+  mark_important_func();
   shader_bind(shader);
   texture_bind(texture, 0);
 
