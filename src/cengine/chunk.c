@@ -302,8 +302,6 @@ unsigned char chunk_update(chunk_t *chunk){
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(b + dv);
         }
         
-        continue;
-        
         // add a face if +x is transparent
         if(block_is_transparent(chunk_get(chunk, x + 1, y, z))){
           w = blocks[block].sides.right; // get texture coordinates

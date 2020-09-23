@@ -182,7 +182,7 @@ void recovery_safeprint(const char* format, ... )
         
         char string[256];
         const char* prefix = "echo ";
-        char* command = malloc( 256+strlen(prefix) );
+        char command[256+5];
         
         vsprintf( string, format, valist );
         
@@ -190,8 +190,6 @@ void recovery_safeprint(const char* format, ... )
         strcpy( command+strlen(prefix), string );
         
         system( command );
-        
-        free(command);
         
         va_end(valist);
 }
