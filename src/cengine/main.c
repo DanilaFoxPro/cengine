@@ -6,11 +6,13 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "cengine.h"
-#include "camera.h"
-#include "utility.h"
-#include "states/menu_state.h"
-#include "states/voxel_state.h"
+#include <cengine/cengine.h>
+#include <cengine/camera.h>
+#include <cengine/utility.h>
+#include <cengine/states/menu_state.h>
+#include <cengine/states/voxel_state.h>
+
+#include <cengine/debug/recovery.h>
 
 double deltaTime = 0.0;
 char firstMouse = 1;
@@ -99,7 +101,11 @@ void on_key(GLFWwindow* window, int key, int scancode, int action, int mods){
 
 int main(){
   printf("starting\n");
-
+  
+  // Sets up robust crash recovery.
+  // Recovers just enough to report as much about the cause of the crash as possible.
+  recovery_setup();
+  
   struct CEngineOptions options = {0};
   int init_status = cengine_init(&cengine, &options, on_key);
   if(init_status < 0){

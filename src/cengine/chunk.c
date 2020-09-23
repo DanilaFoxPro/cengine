@@ -5,9 +5,10 @@
 #include <math.h>
 
 #include <noise.h>
-#include "renderer/utils.h"
-#include "main.h"
-#include "blocks.h"
+#include <cengine/renderer/utils.h>
+#include <cengine/main.h>
+#include <cengine/blocks.h>
+#include <cengine/debug/recovery.h>
 
 #define TEXTURE_SIZE 4
 #define VOID_BLOCK 0 // block id if there is no neighbor for block
@@ -203,6 +204,7 @@ void chunk_free(chunk_t *chunk){
 
 // update the chunk
 unsigned char chunk_update(chunk_t *chunk){
+  mark_important_func();
   // don't update a null chunk
   if(chunk == NULL){
     printf("NOOOO!\n");
@@ -249,14 +251,14 @@ unsigned char chunk_update(chunk_t *chunk){
         }
         
         // texture coords
-        uint8_t w;
-
+        BlockSide w;
+        
         // add a face if -x is transparent
         if( block_is_transparent(chunk_get(chunk, x - 1, y, z))){
           w = blocks[block].sides.left; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
-
+          
           // set the vertex data for the face
           byte4_set(x, y, z, block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
@@ -264,13 +266,13 @@ unsigned char chunk_update(chunk_t *chunk){
           byte4_set(x, y, z, block, chunk->vertex[i++]);
           byte4_set(x, y, z + 1, block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
-
+          
           // set the brightness data for the face
           for(int k = 0; k < 6; k++){
             chunk->brightness[j] = 0;
             byte3_set(-1, 0, 0, chunk->normal[j++]);
           }
-
+          
           // set the texture data for the face
           chunk->texCoords[texCoord++] = half_pixel_correction(a + du); chunk->texCoords[texCoord++] = half_pixel_correction(a + dv);
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(b + dv);
@@ -279,7 +281,7 @@ unsigned char chunk_update(chunk_t *chunk){
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(a + dv);
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(b + dv);
         }
-
+        
         // add a face if +x is transparent
         if(block_is_transparent(chunk_get(chunk, x + 1, y, z))){
           w = blocks[block].sides.right; // get texture coordinates
