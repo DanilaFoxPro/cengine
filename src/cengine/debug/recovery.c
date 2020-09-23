@@ -19,6 +19,8 @@ struct {
         struct FunctionEntry* pointer;
         unsigned int offset;
         unsigned int length;
+        
+        const char* stage;
 } function_log;
 
 uint8_t function_entry_equal( const struct FunctionEntry A, const struct FunctionEntry B )
@@ -38,10 +40,13 @@ static void funclog_setup(void)
         function_log.pointer = malloc( sizeof(struct FunctionEntry)*RECOVERY_FUNCLOG_SIZE );
         function_log.offset  = 0;
         function_log.length  = 0;
+        function_log.stage   = NULL;
 }
 
 static void funclog_push( const struct FunctionEntry new )
 {
+        
+        function_log.stage = NULL;
         
         if( function_log.length != 0 ) {
                 const unsigned int last = (function_log.offset-1) % function_log.length;
@@ -82,6 +87,11 @@ static void funclog_print(void)
                 recovery_safeprint(".\n");
                 
         }
+        
+        if( function_log.stage != NULL ) {
+                recovery_safeprint( "Failed at stage: '%s'.\n", function_log.stage );
+        }
+        
 }
 
 void handle_signal( int signal )
@@ -173,4 +183,7 @@ void recovery_funclog_push(const char* name, const char* file, uint32_t line )
         funclog_push( new );
 }
 
-
+void recovery_funclog_push_stage( const char* name )
+{
+        function_log.stage = name;
+}

@@ -21,7 +21,6 @@ float half_pixel_correction(float coord){
 }
 
 void byte4_set(GLbyte x, GLbyte y, GLbyte z, GLbyte w, byte4 dest){
-  mark_important_func();
   dest[0] = x;
   dest[1] = y;
   dest[2] = z;
@@ -29,7 +28,6 @@ void byte4_set(GLbyte x, GLbyte y, GLbyte z, GLbyte w, byte4 dest){
 }
 
 void byte3_set(GLbyte x, GLbyte y, GLbyte z, byte3 dest){
-  mark_important_func();
   dest[0] = x;
   dest[1] = y;
   dest[2] = z;
@@ -244,7 +242,9 @@ unsigned char chunk_update(chunk_t *chunk){
   float du, dv;
   float a = 0.0f;
   float b = 1.0f;
-
+  
+  mark_important_stage( "iterating over chunk blocks" );
+  
   for(BlockIndex y = 0; y < CHUNK_SIZE; y++){
     for(BlockIndex x = 0; x < CHUNK_SIZE; x++){
       for(BlockIndex z = 0; z < CHUNK_SIZE; z++){
