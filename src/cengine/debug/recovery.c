@@ -6,7 +6,13 @@
 #include <string.h>
 #include <stdarg.h>
 
-const char* last_function = "none";
+struct FunctionEntry {
+        const char* name;
+        const char* file;
+        uint32_t    line;
+};
+
+struct FunctionEntry last_function;
 
 void handle_signal( int signal )
 {
@@ -40,7 +46,12 @@ void handle_signal( int signal )
         }
         
         recovery_safeprint( "Recieved signal: %s\n", signal_name );
-        recovery_safeprint( "Last called function: %s\n", last_function );
+        recovery_safeprint(
+                "Last called function: %s (file: '%s', line: %i)\n",
+                last_function.name,
+                last_function.file,
+                last_function.line
+        );
         
 }
 
@@ -82,10 +93,12 @@ void recovery_safeprint(const char* format, ... )
         va_end(valist);
 }
 
-void recovery_funclog_push(const char* Name)
+void recovery_funclog_push(const char* name, const char* file, uint32_t line )
 {
         // TODO: Proper function log.
-        last_function = Name;
+        last_function.name = name;
+        last_function.file = file;
+        last_function.line = line;
 }
 
 
