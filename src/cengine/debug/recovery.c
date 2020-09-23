@@ -12,7 +12,7 @@ struct FunctionEntry {
         const char* name;
         const char* file;
         uint32_t    line;
-        uint32_t    count;
+        uint32_t    count; // How many times in a row the function was called.
 };
 
 struct StageMark {
@@ -21,6 +21,10 @@ struct StageMark {
         uint32_t    line;
 };
 
+/** Function log as a circular array.
+ *  So when it grows past maximum length -- it loops back.
+ *  Offset keeps track of the current 'first' item.
+ */
 struct {
         struct FunctionEntry* pointer;
         unsigned int offset;
@@ -52,8 +56,10 @@ static void funclog_setup(void)
 static void funclog_push( const struct FunctionEntry new )
 {
         
+        // Reset stage. Because we're entering a new function.
         function_log.stage.name = NULL;
         
+        // If previous entry is the same function -- just increment the count.
         if( function_log.length != 0 ) {
                 const unsigned int last = (function_log.offset-1) % function_log.length;
                 if( function_entry_equal( function_log.pointer[last], new ) ) {
@@ -62,6 +68,7 @@ static void funclog_push( const struct FunctionEntry new )
                 }
         }
         
+        // Insert new function entry.
         memcpy( function_log.pointer+function_log.offset, &new, sizeof(struct FunctionEntry) );
         
         function_log.offset++;
@@ -134,6 +141,10 @@ void handle_signal( int signal )
                         signal_name = "erroneous arithmetic operation";
                         break;
                 }
+                default:{
+                        signal_name = "unknown signal";
+                        break;
+                }
         }
         
         recovery_safeprint( "Recieved signal: %s\n", signal_name );
@@ -180,10 +191,13 @@ void recovery_safeprint(const char* format, ... )
         
         system( command );
         
+        free(command);
+        
         va_end(valist);
 }
 
-void recovery_funclog_push(const char* name, const char* file, uint32_t line )
+/** Push a new function entry to the function log. */
+void recovery_funclog_push( const char* name, const char* file, uint32_t line )
 {
         struct FunctionEntry new;
         new.name = name;
@@ -194,6 +208,10 @@ void recovery_funclog_push(const char* name, const char* file, uint32_t line )
         funclog_push( new );
 }
 
+/**
+ * @brief Push a new stage entry to the function log.
+ * @note Stage gets reset when a new function is marked.
+ */
 void recovery_funclog_push_stage( const char* name, const char* file, uint32_t line )
 {
         function_log.stage.name = name;
