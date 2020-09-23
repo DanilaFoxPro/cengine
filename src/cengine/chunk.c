@@ -32,17 +32,6 @@ void byte3_set(GLbyte x, GLbyte y, GLbyte z, byte3 dest){
   dest[2] = z;
 }
 
-// use magic numbers >.> to check if a block ID is transparent
-unsigned char is_transparent(uint8_t block){
-  switch(block){
-    case 0:
-    case 6:
-      return 1;
-    default:
-      return 0;
-  }
-}
-
 // get the neighbors of this chunk to be referenced for faster chunk generation
 void chunk_get_neighbors(chunk_t *chunk){
   // return;
@@ -90,7 +79,7 @@ void chunk_get_neighbors(chunk_t *chunk){
 }
 
 // convert a local 3d position into a 1d block index
-unsigned short block_index(uint8_t x, uint8_t y, uint8_t z){
+BlockIndex block_index(uint8_t x, uint8_t y, uint8_t z){
   return x | (y << 5) | (z << 10);
 }
 
@@ -250,21 +239,21 @@ unsigned char chunk_update(chunk_t *chunk){
   float a = 0.0f;
   float b = 1.0f;
 
-  for(uint8_t y = 0; y < CHUNK_SIZE; y++){
-    for(uint8_t x = 0; x < CHUNK_SIZE; x++){
-      for(uint8_t z = 0; z < CHUNK_SIZE; z++){
-        uint8_t block = chunk->blocks[block_index(x, y, z)];
-
-        if(!block){
-          continue;
+  for(BlockIndex y = 0; y < CHUNK_SIZE; y++){
+    for(BlockIndex x = 0; x < CHUNK_SIZE; x++){
+      for(BlockIndex z = 0; z < CHUNK_SIZE; z++){
+        BlockIndex block = chunk->blocks[block_index(x, y, z)];
+        
+        if( block == blockid_air ){
+                continue;
         }
-
+        
         // texture coords
         uint8_t w;
 
         // add a face if -x is transparent
-        if(is_transparent(chunk_get(chunk, x - 1, y, z))){
-          w = blocks[block][0]; // get texture coordinates
+        if( block_is_transparent(chunk_get(chunk, x - 1, y, z))){
+          w = blocks[block].sides.left; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 
@@ -292,8 +281,8 @@ unsigned char chunk_update(chunk_t *chunk){
         }
 
         // add a face if +x is transparent
-        if(is_transparent(chunk_get(chunk, x + 1, y, z))){
-          w = blocks[block][1]; // get texture coordinates
+        if(block_is_transparent(chunk_get(chunk, x + 1, y, z))){
+          w = blocks[block].sides.right; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 
@@ -321,8 +310,8 @@ unsigned char chunk_update(chunk_t *chunk){
         }
 
         // add a face if -z is transparent
-        if(is_transparent(chunk_get(chunk, x, y, z - 1))){
-          w = blocks[block][4]; // get texture coordinates
+        if(block_is_transparent(chunk_get(chunk, x, y, z - 1))){
+          w = blocks[block].sides.front; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 
@@ -350,8 +339,8 @@ unsigned char chunk_update(chunk_t *chunk){
         }
 
         // add a face if +z is transparent
-        if(is_transparent(chunk_get(chunk, x, y, z + 1))){
-          w = blocks[block][5]; // get texture coordinates
+        if(block_is_transparent(chunk_get(chunk, x, y, z + 1))){
+          w = blocks[block].sides.back; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 
@@ -379,8 +368,8 @@ unsigned char chunk_update(chunk_t *chunk){
         }
 
         // add a face if -y is transparent
-        if(is_transparent(chunk_get(chunk, x, y - 1, z))){
-          w = blocks[block][3]; // get texture coordinates
+        if(block_is_transparent(chunk_get(chunk, x, y - 1, z))){
+          w = blocks[block].sides.bottom; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 
@@ -408,8 +397,8 @@ unsigned char chunk_update(chunk_t *chunk){
         }
 
         // add a face if +y is transparent
-        if(is_transparent(chunk_get(chunk, x, y + 1, z))){
-          w = blocks[block][2]; // get texture coordinates
+        if(block_is_transparent(chunk_get(chunk, x, y + 1, z))){
+          w = blocks[block].sides.top; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
 

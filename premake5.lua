@@ -80,7 +80,7 @@ project "cengine"
 
   files {"src/**.c", "modules/**.c"}
 
-  includedirs {"include/", "modules/*"}
+  includedirs {"include/", "src/", "modules/*"}
   links {"pthread", "noise"}
 
   disablewarnings {"trigraphs"}

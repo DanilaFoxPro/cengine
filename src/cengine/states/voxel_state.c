@@ -18,11 +18,12 @@
 #include <cglm/cglm.h>
 #include <cglm/struct.h>
 
-#include "../renderer/shader.h"
-#include "../renderer/texture.h"
-#include "../main.h"
-#include "../camera.h"
-#include "../skybox.h"
+#include <cengine/renderer/shader.h>
+#include <cengine/renderer/texture.h>
+#include <cengine/main.h>
+#include <cengine/camera.h>
+#include <cengine/skybox.h>
+#include <cengine/blocks.h>
 
 #define MAX_CHUNKS_GENERATED_PER_FRAME 8
 #define REACH_DISTANCE 12.0f
@@ -424,7 +425,9 @@ uint8_t collide(float *x, float *y, float *z){
 
 void voxel_state_init(){
   printf("voxel state init\n");
-
+  
+  blocks_fill();
+  
   chunks = malloc(chunks_capacity * sizeof(chunk_t));
 
   shader = shader_create(voxel_vertex_shader_source, voxel_fragment_shader_source);
