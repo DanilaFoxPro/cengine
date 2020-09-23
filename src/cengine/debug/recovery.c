@@ -15,12 +15,18 @@ struct FunctionEntry {
         uint32_t    count;
 };
 
+struct StageMark {
+        const char* name;
+        const char* file;
+        uint32_t    line;
+};
+
 struct {
         struct FunctionEntry* pointer;
         unsigned int offset;
         unsigned int length;
         
-        const char* stage;
+        struct StageMark stage;
 } function_log;
 
 uint8_t function_entry_equal( const struct FunctionEntry A, const struct FunctionEntry B )
@@ -40,13 +46,13 @@ static void funclog_setup(void)
         function_log.pointer = malloc( sizeof(struct FunctionEntry)*RECOVERY_FUNCLOG_SIZE );
         function_log.offset  = 0;
         function_log.length  = 0;
-        function_log.stage   = NULL;
+        function_log.stage.name = NULL;
 }
 
 static void funclog_push( const struct FunctionEntry new )
 {
         
-        function_log.stage = NULL;
+        function_log.stage.name = NULL;
         
         if( function_log.length != 0 ) {
                 const unsigned int last = (function_log.offset-1) % function_log.length;
@@ -88,8 +94,13 @@ static void funclog_print(void)
                 
         }
         
-        if( function_log.stage != NULL ) {
-                recovery_safeprint( "Failed at stage: '%s'.\n", function_log.stage );
+        if( function_log.stage.name != NULL ) {
+                recovery_safeprint(
+                        "Failed at stage: '%s'. ('%s', line: %i.)\n",
+                        function_log.stage.name,
+                        function_log.stage.file,
+                        function_log.stage.line
+                );
         }
         
 }
@@ -183,7 +194,9 @@ void recovery_funclog_push(const char* name, const char* file, uint32_t line )
         funclog_push( new );
 }
 
-void recovery_funclog_push_stage( const char* name )
+void recovery_funclog_push_stage( const char* name, const char* file, uint32_t line )
 {
-        function_log.stage = name;
+        function_log.stage.name = name;
+        function_log.stage.file = file;
+        function_log.stage.line = line;
 }

@@ -3,7 +3,7 @@
 
 #include <stdint.h> // uint8_t
 
-typedef uint8_t BlockIndex;
+typedef uint8_t BlockIdentifier;
 typedef int BlockSide;
 
 struct BlockSides {
@@ -47,7 +47,7 @@ enum block_index {
         blockid_LIMIT
 };
 
-uint8_t block_is_transparent( const BlockIndex block_index );
+uint8_t block_is_transparent( const BlockIdentifier block_identifier );
 
 const struct BlockSides blocksides_filled( BlockSide fill );
 const struct BlockSides blocksides_common_fill( BlockSide sides, BlockSide top, BlockSide bottom );

@@ -24,6 +24,7 @@
 #include <cengine/camera.h>
 #include <cengine/skybox.h>
 #include <cengine/blocks.h>
+#include <cengine/chunk.h>
 
 #include <cengine/debug/recovery.h>
 

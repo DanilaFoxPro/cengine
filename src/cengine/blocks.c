@@ -4,9 +4,9 @@
 
 struct BlockInfo blocks[256];
 
-uint8_t block_is_transparent( const BlockIndex block_index )
+uint8_t block_is_transparent( const BlockIdentifier block_identifier )
 {
-        return blockflag_get_value( blocks[block_index].flags, blockflag_opaque );
+        return blockflag_get_value( blocks[block_identifier].flags, blockflag_opaque );
 }
 
 

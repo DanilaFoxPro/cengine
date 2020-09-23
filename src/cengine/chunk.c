@@ -80,7 +80,7 @@ void chunk_get_neighbors(chunk_t *chunk){
 }
 
 // convert a local 3d position into a 1d block index
-BlockIndex block_index(uint8_t x, uint8_t y, uint8_t z){
+BlockIdentifier block_index(uint8_t x, uint8_t y, uint8_t z){
   return x | (y << 5) | (z << 10);
 }
 
@@ -90,55 +90,63 @@ chunk_t chunk_init(int x, int y, int z){
 #if defined DEBUG && defined PRINT_TIMING
     double start = glfwGetTime();
 #endif
-
+  
+  mark_important_stage("allocate required space");
+  
   // allocate the required space for the chunk
-  chunk_t* chunk = malloc(sizeof(chunk_t));
-  chunk->blocks = malloc(CHUNK_SIZE_CUBED * sizeof(uint8_t));
-
+  chunk_t chunk;
+  chunk.blocks = malloc(CHUNK_SIZE_CUBED);
+  
+  mark_important_stage("set stuff");
+  
   // set no elements and no mesh changes but remesh the chunk
-  chunk->elements = 0;
-  chunk->changed = 1;
-  chunk->mesh_changed = 0;
+  chunk.elements = 0;
+  chunk.changed = 1;
+  chunk.mesh_changed = 0;
 
   // set this chunks position
-  chunk->x = x;
-  chunk->y = y;
-  chunk->z = z;
+  chunk.x = x;
+  chunk.y = y;
+  chunk.z = z;
 
+  mark_important_stage("allocate space for vertices, lighting, brightness");
+  
   // allocate space for vertices, lighting, brightness, 
-  chunk->vertex = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte4));
-  chunk->brightness = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(char));
-  chunk->normal = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte3));
-  chunk->texCoords = malloc(CHUNK_SIZE_CUBED * 4 * sizeof(float));
+  chunk.vertex = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte4));
+  chunk.brightness = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(char));
+  chunk.normal = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte3));
+  chunk.texCoords = malloc(CHUNK_SIZE_CUBED * 4 * sizeof(float));
 
   // initialize all neighbours to null to make sure neighbors don't have a value
-  chunk->px = NULL;
-  chunk->nx = NULL;
-  chunk->py = NULL;
-  chunk->ny = NULL;
-  chunk->pz = NULL;
-  chunk->nz = NULL;
+  chunk.px = NULL;
+  chunk.nx = NULL;
+  chunk.py = NULL;
+  chunk.ny = NULL;
+  chunk.pz = NULL;
+  chunk.nz = NULL;
 
-  glGenVertexArrays(1, &chunk->vao);
+  glGenVertexArrays(1, &chunk.vao);
 
 #if defined DEBUG && defined PRINT_TIMING
   unsigned short count = 0;
 #endif
-
+  
+  mark_important_stage("generate blocks");
+  
   for(uint8_t dx = 0; dx < CHUNK_SIZE; dx++){
     for(uint8_t dz = 0; dz < CHUNK_SIZE; dz++){
-      int cx = chunk->x * CHUNK_SIZE + dx;
-      int cz = chunk->z * CHUNK_SIZE + dz;
+      int cx = chunk.x * CHUNK_SIZE + dx;
+      int cz = chunk.z * CHUNK_SIZE + dz;
 
       float f = simplex2(cx * 0.003f, cz * 0.003f, 6, 0.6f, 1.5f);
       int h = pow((f + 1) / 2  + 1, 9);
-      int rh = h - chunk->y * CHUNK_SIZE;
+      int rh = h - chunk.y * CHUNK_SIZE;
 
       for(uint8_t dy = 0; dy < CHUNK_SIZE; dy++){
         uint8_t thickness = rh - dy;
         uint8_t block = h < CHUNK_SIZE / 4 && thickness <= 3 ? 5 : thickness == 1 ? 1 : thickness <= 3 ? 3 : 2;
 
-        chunk->blocks[block_index(dx, dy, dz)] = dy < rh ? h == 0 ? 4 : block : 0;
+        chunk.blocks[block_index(dx, dy, dz)] = dy < rh ? h == 0 ? 4 : block : 0;
 #if defined DEBUG && defined PRINT_TIMING
         if(dy < h){
           count++;
@@ -152,7 +160,7 @@ chunk_t chunk_init(int x, int y, int z){
   printf("chunk gen: %.2fms with %d blocks\n", (glfwGetTime() - start) * 1000.0, count);
 #endif
 
-  return *chunk;
+  return chunk;
 }
 
 // delete the chunk
@@ -245,10 +253,11 @@ unsigned char chunk_update(chunk_t *chunk){
   
   mark_important_stage( "iterating over chunk blocks" );
   
-  for(BlockIndex y = 0; y < CHUNK_SIZE; y++){
-    for(BlockIndex x = 0; x < CHUNK_SIZE; x++){
-      for(BlockIndex z = 0; z < CHUNK_SIZE; z++){
-        BlockIndex block = chunk->blocks[block_index(x, y, z)];
+  for(uint8_t y = 0; y < CHUNK_SIZE; y++){
+    for(uint8_t x = 0; x < CHUNK_SIZE; x++){
+      for(uint8_t z = 0; z < CHUNK_SIZE; z++){
+        mark_important_stage("z loop");
+        BlockIdentifier block = chunk->blocks[block_index(x, y, z)];
         
         if( block == blockid_air ){
                 continue;
@@ -259,9 +268,12 @@ unsigned char chunk_update(chunk_t *chunk){
         
         // add a face if -x is transparent
         if( block_is_transparent(chunk_get(chunk, x - 1, y, z))){
+          mark_important_stage( "-x is transparent" );
           w = blocks[block].sides.left; // get texture coordinates
           // du = (w % TEXTURE_SIZE) * s; dv = (w / TEXTURE_SIZE) * s;
           du = w % TEXTURE_SIZE; dv = w / TEXTURE_SIZE;
+          
+          mark_important_stage( "setting byte4s" );
           
           // set the vertex data for the face
           byte4_set(x, y, z, block, chunk->vertex[i++]);
@@ -271,11 +283,15 @@ unsigned char chunk_update(chunk_t *chunk){
           byte4_set(x, y, z + 1, block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
           
+          mark_important_stage( "setting brightness" );
+          
           // set the brightness data for the face
           for(int k = 0; k < 6; k++){
             chunk->brightness[j] = 0;
             byte3_set(-1, 0, 0, chunk->normal[j++]);
           }
+          
+          mark_important_stage( "setting texture data" );
           
           // set the texture data for the face
           chunk->texCoords[texCoord++] = half_pixel_correction(a + du); chunk->texCoords[texCoord++] = half_pixel_correction(a + dv);
@@ -285,6 +301,8 @@ unsigned char chunk_update(chunk_t *chunk){
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(a + dv);
           chunk->texCoords[texCoord++] = half_pixel_correction(b + du); chunk->texCoords[texCoord++] = half_pixel_correction(b + dv);
         }
+        
+        continue;
         
         // add a face if +x is transparent
         if(block_is_transparent(chunk_get(chunk, x + 1, y, z))){
@@ -496,7 +514,7 @@ void chunk_draw(chunk_t *chunk){
   glDrawArrays(GL_TRIANGLES, 0, chunk->elements);
 }
 
-uint8_t chunk_get(chunk_t *chunk, int x, int y, int z){
+BlockIdentifier chunk_get(chunk_t *chunk, int x, int y, int z){
   // if(x < 0 || x >= CHUNK_SIZE ||
   //    z < 0 || z >= CHUNK_SIZE){
   //   vec2i block_global_position = {floor(chunk->x * CHUNK_SIZE + x), floor(chunk->z * CHUNK_SIZE + z)};
