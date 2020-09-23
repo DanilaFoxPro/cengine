@@ -18,7 +18,7 @@ typedef GLbyte byte3[3];
 typedef int vec2i[2];
 
 typedef struct chunk{
-    BlockIdentifier *blocks;
+  BlockIdentifier *blocks;
   unsigned int vao;
   int elements;
   uint8_t changed;

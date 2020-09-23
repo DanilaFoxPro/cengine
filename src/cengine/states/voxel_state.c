@@ -250,8 +250,10 @@ uint8_t verc_ray_march(float x, float y, float z, float rx, float ry, int *bx, i
 }
 
 void ensure_chunks(int x, int y, int z){
+  mark_important_func();
   unsigned short count = chunk_count;
 
+  mark_important_stage( "iterate over existing chunks" );
   for(unsigned short i = 0; i < count; i++){
     chunk_t *chunk = &chunks[i];
     int dx = x - chunk->x;
@@ -264,35 +266,13 @@ void ensure_chunks(int x, int y, int z){
 
       chunk_t *other = chunks + (--count);
       memcpy(chunk, other, sizeof(chunk_t));
-
-      // chunk->blocks = other->blocks;
-      // chunk->elements = other->elements;
-      // chunk->changed = other->changed;
-      // chunk->mesh_changed = other->mesh_changed;
-      // chunk->x = other->x;
-      // chunk->y = other->y;
-      // chunk->z = other->z;
-      // chunk->vertex = other->vertex;
-      // chunk->brightness = other->brightness;
-      // chunk->normal = other->normal;
-      // chunk->texCoords = other->texCoords;
-      // chunk->px = other->px;
-      // chunk->nx = other->nx;
-      // chunk->py = other->py;
-      // chunk->ny = other->ny;
-      // chunk->pz = other->pz;
-      // chunk->nz = other->nz;
-
-      // chunk_free(other);
-      // printf("d\n");
-      // free(other);
-      // printf("e\n");
-      // other = NULL;
+      
     }
   }
 
   chunk_count = count;
 
+  mark_important_stage( "generate new chunks" );
   // generate new chunks needed
   unsigned short chunks_generated = 0;
   for(char i = -CHUNK_RENDER_RADIUS; i <= CHUNK_RENDER_RADIUS; i++){
@@ -317,7 +297,17 @@ void ensure_chunks(int x, int y, int z){
           if(chunk_count + 1 >= chunks_capacity){
             chunks_capacity *= 2;
             printf("reached max number of chunks, resizing to %d\n", chunks_capacity);
+            
+            chunk_t* old_chunks = chunks;
             chunks = realloc(chunks, chunks_capacity * sizeof(chunk_t));
+            
+            // 'realloc' returns a NULL pointer if it failed to re-allocate storage.
+            // The original pointer should still be valid in that scenario.
+            if( chunks == NULL ) {
+              printf( "Failed to reallocate chunk storage." );
+              chunks = old_chunks;
+              return;
+            }
           }
 
           chunk_t chunk = chunk_init(cx, cy, cz);
