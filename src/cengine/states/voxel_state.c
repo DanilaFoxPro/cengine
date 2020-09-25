@@ -249,12 +249,25 @@ uint8_t verc_ray_march(float x, float y, float z, float rx, float ry, int *bx, i
   return 0;
 }
 
+/** Tries to find chunk by chunk coordinates. Returns NULL on failure. */
+chunk_t* chunk_find_by_coordinates( const int x, const int y, const int z )
+{
+        for(unsigned short i = 0; i < chunk_count; i++){
+                chunk_t *chunk = &chunks[i];
+                if( chunk->x == x
+                 && chunk->y == y
+                 && chunk->z == z){
+                        return chunk;
+                }
+        }
+        return NULL;
+}
+
 void ensure_chunks(int x, int y, int z){
   mark_important_func();
-  unsigned short count = chunk_count;
 
   mark_important_stage( "iterate over existing chunks" );
-  for(unsigned short i = 0; i < count; i++){
+  for(unsigned short i = 0; i < chunk_count; i++){
     chunk_t *chunk = &chunks[i];
     int dx = x - chunk->x;
     int dy = y - chunk->y;
@@ -264,61 +277,52 @@ void ensure_chunks(int x, int y, int z){
     if(abs(dx) > CHUNK_RENDER_RADIUS || abs(dy) > CHUNK_RENDER_RADIUS || abs(dz) > CHUNK_RENDER_RADIUS){
       chunk_free(chunk);
 
-      chunk_t *other = chunks + (--count);
+      chunk_t *other = chunks + (--chunk_count);
       memcpy(chunk, other, sizeof(chunk_t));
       
     }
   }
 
-  chunk_count = count;
-
   mark_important_stage( "generate new chunks" );
   // generate new chunks needed
   unsigned short chunks_generated = 0;
-  for(char i = -CHUNK_RENDER_RADIUS; i <= CHUNK_RENDER_RADIUS; i++){
-    for(char j = -CHUNK_RENDER_RADIUS; j <= CHUNK_RENDER_RADIUS; j++){
-      for(char k = -CHUNK_RENDER_RADIUS; k <= CHUNK_RENDER_RADIUS; k++){
+  for(int8_t i = -CHUNK_RENDER_RADIUS; i <= CHUNK_RENDER_RADIUS; i++){
+    for(int8_t j = -CHUNK_RENDER_RADIUS; j <= CHUNK_RENDER_RADIUS; j++){
+      for(int8_t k = -CHUNK_RENDER_RADIUS; k <= CHUNK_RENDER_RADIUS; k++){
         int cx = x + i;
         int cy = y + k;
         int cz = z + j;
-        unsigned char create = 1;
 
         // see if chunk already exists
-        for(unsigned short l = 0; l < chunk_count; l++){
-          chunk_t *chunk = &chunks[l];
-          if(chunk->x == cx && chunk->y == cy && chunk->z == cz){
-            create = 0;
-            break;
-          }
+        if( chunk_find_by_coordinates( cx, cy, cz ) != NULL ) {
+          continue;
         }
 
-        if(create){
-          // expand chunk capacity if needed
-          if(chunk_count + 1 >= chunks_capacity){
-            chunks_capacity *= 2;
-            printf("reached max number of chunks, resizing to %d\n", chunks_capacity);
-            
-            chunk_t* old_chunks = chunks;
-            chunks = realloc(chunks, chunks_capacity * sizeof(chunk_t));
-            
-            // 'realloc' returns a NULL pointer if it failed to re-allocate storage.
-            // The original pointer should still be valid in that scenario.
-            if( chunks == NULL ) {
-              printf( "Failed to reallocate chunk storage." );
-              chunks = old_chunks;
-              return;
-            }
-          }
+        // expand chunk capacity if needed
+        if( chunk_count + 1 >= chunks_capacity ){
+                chunks_capacity *= 2;
+                printf("reached max number of chunks, resizing to %d\n", chunks_capacity);
+                
+                chunk_t* old_chunks = chunks;
+                chunks = realloc(chunks, chunks_capacity * sizeof(chunk_t));
+                
+                // 'realloc' returns a NULL pointer if it failed to re-allocate storage.
+                // The original pointer should still be valid in that scenario.
+                if( chunks == NULL ) {
+                        printf( "Failed to reallocate chunk storage." );
+                        chunks = old_chunks;
+                        return;
+                }
+        }
 
-          chunk_t chunk = chunk_init(cx, cy, cz);
-          chunks[chunk_count] = chunk;
-          chunk_count++;
-          chunks_generated++;
+        chunk_t chunk = chunk_init(cx, cy, cz);
+        chunks[chunk_count] = chunk;
+        chunk_count++;
+        chunks_generated++;
 
-          if(chunks_generated >= MAX_CHUNKS_GENERATED_PER_FRAME){
-            // printf("generated max number of chunks for this frame\n");
-            return;
-          }
+        if(chunks_generated >= MAX_CHUNKS_GENERATED_PER_FRAME){
+          // printf("generated max number of chunks for this frame\n");
+          return;
         }
       }
     }

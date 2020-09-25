@@ -6,7 +6,6 @@
 #define GLEW_STATIC
 #include "GL/glew.h"
 
-#include <cengine/states/voxel_state.h>
 #include <cengine/blocks.h>
 
 #define CHUNK_SIZE 32
@@ -39,7 +38,7 @@ typedef struct chunk{
   struct chunk *nz;
 } chunk_t;
 
-BlockIdentifier block_index(uint8_t x, uint8_t y, uint8_t z);
+unsigned int block_index(uint8_t x, uint8_t y, uint8_t z);
 chunk_t chunk_init(int x, int y, int z);
 void chunk_free(chunk_t *chunk);
 unsigned char chunk_update(chunk_t *chunk);

@@ -9,6 +9,7 @@
 #include <cengine/main.h>
 #include <cengine/blocks.h>
 #include <cengine/debug/recovery.h>
+#include <cengine/states/voxel_state.h>
 
 #define TEXTURE_SIZE 4
 #define VOID_BLOCK 0 // block id if there is no neighbor for block
@@ -80,7 +81,7 @@ void chunk_get_neighbors(chunk_t *chunk){
 }
 
 // convert a local 3d position into a 1d block index
-BlockIdentifier block_index(uint8_t x, uint8_t y, uint8_t z){
+unsigned int block_index(uint8_t x, uint8_t y, uint8_t z){
   return x | (y << 5) | (z << 10);
 }
 
@@ -95,7 +96,7 @@ chunk_t chunk_init(int x, int y, int z){
   
   // allocate the required space for the chunk
   chunk_t chunk;
-  chunk.blocks = malloc(CHUNK_SIZE_CUBED);
+  chunk.blocks = malloc( (sizeof *chunk.blocks) * CHUNK_SIZE_CUBED );
   
   mark_important_stage("set stuff");
   
@@ -112,10 +113,10 @@ chunk_t chunk_init(int x, int y, int z){
   mark_important_stage("allocate space for vertices, lighting, brightness");
   
   // allocate space for vertices, lighting, brightness, 
-  chunk.vertex = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte4));
-  chunk.brightness = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(char));
-  chunk.normal = malloc(CHUNK_SIZE_CUBED * 2 * sizeof(byte3));
-  chunk.texCoords = malloc(CHUNK_SIZE_CUBED * 4 * sizeof(float));
+  chunk.vertex     = malloc( (sizeof *chunk.vertex) * CHUNK_SIZE_CUBED * 2);
+  chunk.brightness = malloc( (sizeof *chunk.brightness) * CHUNK_SIZE_CUBED * 2);
+  chunk.normal     = malloc( (sizeof *chunk.normal) * CHUNK_SIZE_CUBED * 2);
+  chunk.texCoords  = malloc( (sizeof *chunk.texCoords) * CHUNK_SIZE_CUBED * 4);
 
   // initialize all neighbours to null to make sure neighbors don't have a value
   chunk.px = NULL;
@@ -144,7 +145,7 @@ chunk_t chunk_init(int x, int y, int z){
 
       for(uint8_t dy = 0; dy < CHUNK_SIZE; dy++){
         uint8_t thickness = rh - dy;
-        uint8_t block = h < CHUNK_SIZE / 4 && thickness <= 3 ? 5 : thickness == 1 ? 1 : thickness <= 3 ? 3 : 2;
+        BlockIdentifier block = h < CHUNK_SIZE / 4 && thickness <= 3 ? blockid_sand : thickness == 1 ? blockid_grass : thickness <= 3 ? blockid_dirt : blockid_stone;
 
         chunk.blocks[block_index(dx, dy, dz)] = dy < rh ? h == 0 ? 4 : block : 0;
 #if defined DEBUG && defined PRINT_TIMING
@@ -276,11 +277,11 @@ unsigned char chunk_update(chunk_t *chunk){
           mark_important_stage( "setting byte4s" );
           
           // set the vertex data for the face
-          byte4_set(x, y, z, block, chunk->vertex[i++]);
+          byte4_set(x, y, z,         block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
-          byte4_set(x, y + 1, z, block, chunk->vertex[i++]);
-          byte4_set(x, y, z, block, chunk->vertex[i++]);
-          byte4_set(x, y, z + 1, block, chunk->vertex[i++]);
+          byte4_set(x, y + 1, z,     block, chunk->vertex[i++]);
+          byte4_set(x, y, z,         block, chunk->vertex[i++]);
+          byte4_set(x, y, z + 1,     block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
           
           mark_important_stage( "setting brightness" );
@@ -449,7 +450,9 @@ unsigned char chunk_update(chunk_t *chunk){
       }
     }
   }
-
+  
+  chunk_update_end:
+  
   chunk->elements = i; // set number of vertices
   chunk->mesh_changed = 1; // set mesh has changed flag
 

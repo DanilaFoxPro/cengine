@@ -12,9 +12,14 @@ void recovery_funclog_push_stage( const char* name, const char* file, uint32_t l
 
 #define RECOVERY_FUNCLOG_SIZE 32
 
-/** Mark the function as important, so calls to this function will be included in the recovery log. */
-#define mark_important_func() recovery_funclog_push(__func__, __FILE__, __LINE__)
-/** Records the supplied string to the recovery log as a stage. Latest recorded stage is displayed. */
-#define mark_important_stage(x) recovery_funclog_push_stage(x, __FILE__, __LINE__);
+#ifdef DEBUG
+        /** Mark the function as important, so calls to this function will be included in the recovery log. */
+        #define mark_important_func() recovery_funclog_push(__func__, __FILE__, __LINE__)
+        /** Records the supplied string to the recovery log as a stage. Latest recorded stage is displayed. */
+        #define mark_important_stage(x) recovery_funclog_push_stage(x, __FILE__, __LINE__)
+#else
+        #define mark_important_func()
+        #define mark_important_stage(x)
+#endif
 
 #endif

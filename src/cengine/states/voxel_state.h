@@ -5,12 +5,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../chunk.h"
+#include <cengine/chunk.h>
 
 #define CHUNK_RENDER_RADIUS 6
 
-struct chunk *chunks;
-unsigned short chunk_count;
+extern chunk_t *chunks;
+extern unsigned short chunk_count;
 
 void voxel_state_init();
 void voxel_state_destroy();
