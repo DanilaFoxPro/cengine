@@ -81,7 +81,7 @@ void chunk_get_neighbors(chunk_t *chunk){
 }
 
 // convert a local 3d position into a 1d block index
-unsigned int block_index(uint8_t x, uint8_t y, uint8_t z){
+uint16_t block_index(uint8_t x, uint8_t y, uint8_t z){
   return x | (y << 5) | (z << 10);
 }
 
@@ -516,120 +516,25 @@ void chunk_draw(chunk_t *chunk){
 }
 
 BlockIdentifier chunk_get(chunk_t *chunk, int x, int y, int z){
-  // if(x < 0 || x >= CHUNK_SIZE ||
-  //    z < 0 || z >= CHUNK_SIZE){
-  //   vec2i block_global_position = {floor(chunk->x * CHUNK_SIZE + x), floor(chunk->z * CHUNK_SIZE + z)};
-  //   vec2i chunk_position = {floor(block_global_position[0] / CHUNK_SIZE), floor(block_global_position[1] / CHUNK_SIZE)};
-  //   vec2i block_local_position = {
-  //     (CHUNK_SIZE + (block_global_position[0] % CHUNK_SIZE)) % CHUNK_SIZE,
-  //     (CHUNK_SIZE + (block_global_position[1] % CHUNK_SIZE)) % CHUNK_SIZE
-  //   };
-
-  //   unsigned short access = block_index(block_local_position[0], y, block_local_position[1]);
-
-  //   for(unsigned short i = 0; i < chunk_count; i++){
-  //     chunk_t *other = chunks[i];
-  //     if(other->x == chunk_position[0] && other->z == chunk_position[1]){
-  //       return other->blocks[access];
-  //     }
-  //   }
-
-  //   return 0;
-  // }
 
   uint8_t block;
 
-  // printf("%d %d %d\n", x, y, z);
   if(x < 0){
-    // printf("nx\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x - 1 && other->y == chunk->y && other->z == chunk->z){
-    //     return other->blocks[block_index(CHUNK_SIZE + x, y, z)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->nx == NULL || chunk->nx->blocks == NULL ? VOID_BLOCK : chunk->nx->blocks[block_index(CHUNK_SIZE + x, y, z)];
-    // printf("b\n");
   }else if(x >= CHUNK_SIZE){
-    // printf("px\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x + 1 && other->y == chunk->y && other->z == chunk->z){
-    //     return other->blocks[block_index(x % CHUNK_SIZE, y, z)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->px == NULL || chunk->px->blocks == NULL ? VOID_BLOCK : chunk->px->blocks[block_index(x % CHUNK_SIZE, y, z)];
-    // printf("b\n");
   }else if(y < 0){
-    // printf("ny\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x && other->y == chunk->y - 1 && other->z == chunk->z){
-    //     return other->blocks[block_index(x, CHUNK_SIZE + y, z)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->ny == NULL || chunk->ny->blocks == NULL ? VOID_BLOCK : chunk->ny->blocks[block_index(x, CHUNK_SIZE + y, z)];
-    // printf("b\n");
   }else if(y >= CHUNK_SIZE){
-    // printf("py\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x && other->y == chunk->y + 1 && other->z == chunk->z){
-    //     return other->blocks[block_index(x, y % CHUNK_SIZE, z)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->py == NULL || chunk->py->blocks == NULL ? VOID_BLOCK : chunk->py->blocks[block_index(x, y % CHUNK_SIZE, z)];
-    // printf("b\n");
   }else if(z < 0){
-    // printf("nz\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x && other->y == chunk->y && other->z == chunk->z - 1){
-    //     return other->blocks[block_index(x, y, CHUNK_SIZE + z)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->nz == NULL || chunk->nz->blocks == NULL ? VOID_BLOCK : chunk->nz->blocks[block_index(x, y, CHUNK_SIZE + z)];
-    // printf("b\n");
   }else if(z >= CHUNK_SIZE){
-    // printf("pz\n");
-    // for(unsigned short i = 0; i < chunk_count; i++){
-    //   chunk_t *other = &chunks[i];
-
-    //   if(other->x == chunk->x && other->y == chunk->y && other->z == chunk->z + 1){
-    //     return other->blocks[block_index(x, y, z % CHUNK_SIZE)];
-    //   }
-    // }
-    // return 4;
-
-    // printf("a\n");
     block = chunk->pz == NULL || chunk->pz->blocks == NULL ? VOID_BLOCK : chunk->pz->blocks[block_index(x, y, z % CHUNK_SIZE)];
-    // printf("b\n");
   }else{
-    // printf("c\n");
     block = chunk->blocks[block_index(x, y, z)];
   }
-
-  // printf("c %d\n", block);
+  
   return block;
 }
 

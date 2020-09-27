@@ -49,8 +49,8 @@ const static char* voxel_fragment_shader_source = ""
 ;
 
 chunk_t *chunks;
-unsigned short chunk_count = 0;
-unsigned short chunks_capacity = 4096;
+uint16_t chunk_count = 0;
+uint16_t chunks_capacity = 4096;
 
 unsigned int shader, texture, projection_location, view_location, camera_position_location, light_direction_location, daylight_location;
 Skybox skybox;
