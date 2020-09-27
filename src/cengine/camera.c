@@ -1,13 +1,7 @@
-#include "camera.h"
+#include <cengine/cengine.h>
 
 #include <math.h>
 #include <stdio.h>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include "main.h"
 
 #include <string.h> // memcpy
 

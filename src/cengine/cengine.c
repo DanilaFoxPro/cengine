@@ -1,8 +1,6 @@
-#include "cengine.h"
+#include <cengine/cengine.h>
 
 #include <stdio.h>
-
-#include "main.h"
 
 void error_callback(int error, const char* description){
   fprintf(stderr, "glfw error: %s\n", description);

@@ -1,6 +1,4 @@
-#include <cengine\blocks.h>
-
-#include <cengine/debug/recovery.h>
+#include <cengine/cengine.h>
 
 struct BlockInfo blocks[256];
 

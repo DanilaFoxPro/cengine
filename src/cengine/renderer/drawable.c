@@ -1,11 +1,6 @@
-#include "drawable.h"
+#include <cengine/cengine.h>
 
 #include <stdlib.h>
-
-#define GLEW_STATIC
-#include "GL/glew.h"
-
-#include "shader.h"
 
 #define DRAWABLE_SIZE 8
 // #define DRAWABLE_SIZE 14

@@ -1,15 +1,6 @@
-#include "menu_state.h"
+#include <cengine/cengine.h>
 
 #include <stdio.h>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
-#define CGLM_ALL_UNALIGNED
-#include <cglm/cglm.h>
-#include <cglm/struct.h>
-
-#include "../renderer/shader.h"
-#include "../renderer/texture.h"
 
 
 const float quad_vertices[] = {

@@ -1,22 +1,6 @@
-#include "game_state.h"
+#include <cengine/cengine.h>
 
 #include <stdio.h>
-// #include <unistd.h>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#define CGLM_ALL_UNALIGNED
-#include <cglm/cglm.h>
-#include <cglm/struct.h>
-
-#include "../renderer/shader.h"
-#include "../renderer/texture.h"
-#include "../renderer/drawable.h"
-#include "../camera.h"
-#include "../main.h"
-#include "../skybox.h"
-#include "../cengine.h"
 
 #define MODEL_NUMBER PLANE
 

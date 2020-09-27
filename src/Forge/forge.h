@@ -35,8 +35,8 @@ typedef float real32;
 typedef double real64;
 typedef unsigned char boolean;
 #endif
-typedef signed __int64 int64;
-typedef unsigned __int64 uint64;
+// typedef signed __int64 int64;
+// typedef unsigned __int64 uint64;
 
 #define F_DOUBLE_PRECISION /* if F_DOUBLE_PRECISION is defined the type "freal" is defined as double otherwhise it will be defined as float. This is very usefull if you want to write an application that can be compiled to use either 32 or 64 bit floating point math. Forges entire match librarie are defined in both 32 and 64 bit precission and all functionality can be accessed using the freal type, a macro will replace all freal calls with the aropriate funtion using either 32 or 64 bit depending on if F_DOUBLE_PRECISION is defined*/
 

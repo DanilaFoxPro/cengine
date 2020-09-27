@@ -1,4 +1,4 @@
-#include "voxel_state.h"
+#include <cengine/cengine.h>
 
 // #define MULTI_THREADING
 
@@ -13,20 +13,6 @@
 #else
 #include <unistd.h>
 #endif
-
-#define CGLM_ALL_UNALIGNED
-#include <cglm/cglm.h>
-#include <cglm/struct.h>
-
-#include <cengine/renderer/shader.h>
-#include <cengine/renderer/texture.h>
-#include <cengine/main.h>
-#include <cengine/camera.h>
-#include <cengine/skybox.h>
-#include <cengine/blocks.h>
-#include <cengine/chunk.h>
-
-#include <cengine/debug/recovery.h>
 
 #define MAX_CHUNKS_GENERATED_PER_FRAME 8
 #define REACH_DISTANCE 12.0f
@@ -426,20 +412,25 @@ void voxel_state_init(){
   
   blocks_fill();
   
+  mark_important_stage("allocate chunk storage");
   chunks = malloc(chunks_capacity * sizeof(chunk_t));
-
+  
+  mark_important_stage("create shaders");
   shader = shader_create(voxel_vertex_shader_source, voxel_fragment_shader_source);
   shader_bind(shader);
 
+  mark_important_stage("get uniform locations");
   projection_location = shader_uniform_position(shader, "projection");
   view_location = shader_uniform_position(shader, "view");
   camera_position_location = shader_uniform_position(shader, "camera_position");
   light_direction_location = shader_uniform_position(shader, "light_direction");
   daylight_location = shader_uniform_position(shader, "daylight");
   shader_uniform1i(shader, "diffuse_texture", 0);
-
+  
+  mark_important_stage("create textures");
   texture = texture_create("tiles.png", GL_NEAREST);
-
+  
+  mark_important_stage("skybox and time");
   skybox_init();
   skybox_create(&skybox);
 
@@ -451,6 +442,7 @@ void voxel_state_init(){
   }
 #endif
 
+  mark_important_stage("set input mode");
   glfwSetInputMode(cengine.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 

@@ -1,18 +1,9 @@
-#include "main.h"
+#include <cengine/cengine.h>
 
 #include <stdio.h>
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <cengine/cengine.h>
-#include <cengine/camera.h>
-#include <cengine/utility.h>
-#include <cengine/states/menu_state.h>
-#include <cengine/states/voxel_state.h>
-
-#include <cengine/debug/recovery.h>
+#define MAX(a, b) ((a) >= (b)) ? (a) : (b)
+#define WALKING 0
 
 double deltaTime = 0.0;
 char firstMouse = 1;
@@ -120,6 +111,8 @@ int main(){
   menu_state.update = menu_state_update;
   menu_state.draw = menu_state_draw;
   state_manager_push(&cengine.state_manager, &menu_state);
+  
+  check_memory();
   
   voxel_state = state_get_empty();
   voxel_state.init = voxel_state_init;

@@ -1,15 +1,8 @@
-#include "chunk.h"
+#include <cengine/cengine.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#include <noise.h>
-#include <cengine/renderer/utils.h>
-#include <cengine/main.h>
-#include <cengine/blocks.h>
-#include <cengine/debug/recovery.h>
-#include <cengine/states/voxel_state.h>
 
 #define TEXTURE_SIZE 4
 #define VOID_BLOCK 0 // block id if there is no neighbor for block
@@ -92,6 +85,8 @@ chunk_t chunk_init(int x, int y, int z){
     double start = glfwGetTime();
 #endif
   
+  check_memory();
+    
   mark_important_stage("allocate required space");
   
   // allocate the required space for the chunk

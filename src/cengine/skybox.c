@@ -1,13 +1,6 @@
-#include "skybox.h"
+#include <cengine/cengine.h>
 
 #include <stdlib.h>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <glfw/glfw3.h>
-
-#include "renderer/shader.h"
-#include "camera.h"
 
 unsigned int skybox_shader, skybox_projection_location, skybox_view_location;
 
@@ -59,6 +52,7 @@ const char* skybox_fragment_shader_source = ""
 ;
 
 void skybox_init(){
+  mark_important_func();
   skybox_shader = shader_create(skybox_vertex_shader_source, skybox_fragment_shader_source);
   skybox_projection_location = shader_uniform_position(skybox_shader, "projection");
   skybox_view_location = shader_uniform_position(skybox_shader, "view");
@@ -74,6 +68,7 @@ void skybox_projection(float* projection_matrix){
 }
 
 void skybox_create(Skybox *skybox){
+  mark_important_func();
   unsigned int vbo, ebo;
   glGenVertexArrays(1, &skybox->vao);
   glGenBuffers(1, &vbo);

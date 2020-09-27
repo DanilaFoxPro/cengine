@@ -1,3 +1,4 @@
+#include <cengine/cengine.h>
 #include <cengine/debug/recovery.h>
 
 #include <signal.h>
@@ -5,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-
-#include <cengine/utility.h>
 
 struct FunctionEntry {
         const char* name;
