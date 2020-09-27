@@ -150,6 +150,7 @@ void handle_signal( int signal )
         recovery_safeprint( "Function log:         (older calls first)\n" );
         recovery_safeprint( ".\n" );
         funclog_print();
+        recovery_safeprint( "Signal: %s\n", signal_name );
         
 }
 
