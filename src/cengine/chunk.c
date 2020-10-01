@@ -74,8 +74,9 @@ void chunk_get_neighbors(chunk_t *chunk){
 }
 
 // convert a local 3d position into a 1d block index
+// 
 uint16_t block_index(uint8_t x, uint8_t y, uint8_t z){
-  return x | (y << 5) | (z << 10);
+  return (x | (y << 5) | (z << 10)) % CHUNK_SIZE_CUBED;
 }
 
 // initialize a new chunk
@@ -140,9 +141,26 @@ chunk_t chunk_init(int x, int y, int z){
 
       for(uint8_t dy = 0; dy < CHUNK_SIZE; dy++){
         uint8_t thickness = rh - dy;
-        BlockIdentifier block = h < CHUNK_SIZE / 4 && thickness <= 3 ? blockid_sand : thickness == 1 ? blockid_grass : thickness <= 3 ? blockid_dirt : blockid_stone;
-
-        chunk.blocks[block_index(dx, dy, dz)] = dy < rh ? h == 0 ? 4 : block : 0;
+        
+        BlockIdentifier block;
+        if( dy < rh ) {
+                if( h < CHUNK_SIZE / 4 && thickness <= 3 ) {
+                        block = blockid_sand;
+                } else if( thickness == 1 ) {
+                        block = blockid_grass;
+                } else if( thickness <= 3 ) {
+                        block = blockid_dirt;
+                } else if( h == 0 ){
+                        block = blockid_bedrock;
+                } else{
+                        block = blockid_stone;
+                }
+        } else {
+                block = blockid_air;
+        }
+        
+        chunk.blocks[block_index(dx, dy, dz)] = block;
+        
 #if defined DEBUG && defined PRINT_TIMING
         if(dy < h){
           count++;
@@ -272,6 +290,11 @@ unsigned char chunk_update(chunk_t *chunk){
           mark_important_stage( "setting byte4s" );
           
           // set the vertex data for the face
+          
+          // Since we only use whole numbers for vertex coordinates,
+          // they're recorded as bytes. Then they're converted to floats
+          // when needed by the shader.
+          
           byte4_set(x, y, z,         block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z + 1, block, chunk->vertex[i++]);
           byte4_set(x, y + 1, z,     block, chunk->vertex[i++]);
@@ -541,7 +564,7 @@ void chunk_set(chunk_t *chunk, int x, int y, int z, uint8_t block){
   if(_block == 4 || _block == block){
     return;
   }
-
+  
   chunk->blocks[access] = block;
   chunk->changed = 1;
 

@@ -84,7 +84,7 @@ void get_sight_vector(float rx, float ry, float *vx, float *vy, float *vz){
   *vz = sinf(rx - glm_rad(90.0f)) * m;
 }
 
-uint8_t _hit_test(uint8_t *blocks, float max_distance, float x, float y, float z, float vx, float vy, float vz, int *hx, int *hy, int *hz){
+uint8_t _hit_test(BlockIdentifier *blocks, float max_distance, float x, float y, float z, float vx, float vy, float vz, int *hx, int *hy, int *hz){
   uint8_t m = 32;
   int px = 0;
   int py = 0;
