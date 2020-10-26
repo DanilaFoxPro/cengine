@@ -23,9 +23,9 @@ set "CC=gcc"
 :: Action[n].OK  -- OK value of '%ERRORLEVEL%'.
 
 set "Action[0].CMD=premake5 gmake2"
-set "Action[0].OK=1"
+set "Action[0].OK=0"
 set "Action[1].CMD=mingw32-make config=%config%"
-set "Action[1].OK=1"
+set "Action[1].OK=0"
 
 call :struct_array_last_element Action CMD
 set "ActionLast=%ERRORLEVEL%"
@@ -38,15 +38,6 @@ echo Total actions: %TotalActions%
 for /L %%i IN (0, 1, %ActionLast%) DO (
         call :print "Executing action %%i.."
         call :execute_action %%i
-        if NOT %ERRORLEVEL% == !Action[%%i].OK! (
-                call :print ". -- ERROR (%ERRORLEVEL%)"
-                echo.
-                call :handle_error %%i
-                goto exit
-        ) else (
-                call :print ". -- OK (%ERRORLEVEL%)"
-                echo.
-        )
 )
 
 :exit
@@ -65,6 +56,15 @@ exit /b 0
 :execute_action& rem [ActionIndex]
         set "ActionIndex=%~1"
         call !Action[%ActionIndex%].CMD! 1>build_out.log 2>build_err.log
+        if NOT %ERRORLEVEL% == !Action[%ActionIndex%].OK! (
+                call :print ". -- ERROR (%ERRORLEVEL%)"
+                echo.
+                call :handle_error %ActionIndex%
+                goto exit
+        ) else (
+                call :print ". -- OK (%ERRORLEVEL%)"
+                echo.
+        )
 exit /b %ERRORLEVEL%
 
 :handle_error& rem [ActionIndex]
