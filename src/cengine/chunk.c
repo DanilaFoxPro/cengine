@@ -159,6 +159,7 @@ chunk_t chunk_init(int x, int y, int z){
                 block = blockid_air;
         }
         
+        // MARK: Modifying chunk blocks.
         chunk.blocks[block_index(dx, dy, dz)] = block;
         
 #if defined DEBUG && defined PRINT_TIMING
@@ -561,7 +562,7 @@ void chunk_set(chunk_t *chunk, int x, int y, int z, uint8_t block){
   unsigned short access = block_index(x, y, z);
   uint8_t _block = chunk->blocks[access];
   printf("trying to set block %d %d %d from %d to %d\n", x, y, z, _block, block);
-  if(_block == 4 || _block == block){
+  if( _block == block ){
     return;
   }
   
