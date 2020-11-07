@@ -1,3 +1,7 @@
+<div align="center">
+
+![Cover](cover.png)
+
 ## cengine
 
 [![License](https://img.shields.io/github/license/The-Noah/cengine)](LICENSE)
